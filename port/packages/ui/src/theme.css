@@ -1,0 +1,106 @@
+/* Palmier theme system. Tokens ported from AppTheme.swift.
+ *
+ * Surfaces are expressed as rgb channel triplets composed with --surface-opacity,
+ * so the Liquid Glass look (translucent panels + backdrop blur) is a runtime knob
+ * rather than a separate stylesheet. themeStore.ts writes the dynamic vars
+ * (--accent, --surface-opacity, --glass-blur, --bg-image) onto :root live. */
+
+:root {
+  /* sRGB channels (0-255) */
+  --c-base: 10 10 10;
+  --c-surface: 22 22 22;
+  --c-raised: 30 30 30;
+  --c-prominent: 44 44 44;
+  --c-white: 255 255 255;
+  --accent: 245 239 228;
+
+  /* runtime knobs (themeStore overrides these) */
+  --surface-opacity: 1;
+  --glass-blur: 0px;
+  --bg-image: none;
+
+  /* composed surfaces */
+  --bg-base: rgb(var(--c-base));
+  --bg-surface: rgb(var(--c-surface) / var(--surface-opacity));
+  --bg-raised: rgb(var(--c-raised) / var(--surface-opacity));
+  --bg-prominent: rgb(var(--c-prominent) / var(--surface-opacity));
+
+  /* borders (AppTheme.Border) */
+  --border-primary: rgb(var(--c-white) / 0.16);
+  --border-subtle: rgb(var(--c-white) / 0.12);
+  --border-divider: rgb(var(--c-white) / 0.44);
+
+  /* text (AppTheme.Text) */
+  --text-primary: rgb(var(--c-white) / 1);
+  --text-secondary: rgb(var(--c-white) / 0.8);
+  --text-tertiary: rgb(var(--c-white) / 0.62);
+  --text-muted: rgb(var(--c-white) / 0.34);
+
+  --accent-color: rgb(var(--accent));
+
+  /* radii (AppTheme.Radius) */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* spacing (AppTheme.Spacing) */
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 10px;
+  --space-lg: 14px;
+  --space-xl: 20px;
+
+  /* shadows (AppTheme.Shadow) */
+  --shadow-sm: 0 0.5px 1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 2px 4px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.25);
+
+  --anim-hover: 150ms;
+  --anim-transition: 200ms;
+
+  color-scheme: dark;
+}
+
+/* ---- Presets ---- */
+
+/* OLED: pure-black base, slightly darker plates */
+:root[data-theme="oled"] {
+  --c-base: 0 0 0;
+  --c-surface: 12 12 12;
+  --c-raised: 20 20 20;
+  --c-prominent: 32 32 32;
+}
+
+/* Liquid Glass: translucent surfaces + blur. Pair with a --bg-image for depth. */
+:root[data-theme="liquid-glass"] {
+  --surface-opacity: 0.55;
+  --glass-blur: 18px;
+}
+
+/* ---- Primitives that consume the tokens ---- */
+
+.pp-app {
+  background-color: var(--bg-base);
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  color: var(--text-primary);
+}
+
+.pp-surface {
+  background-color: var(--bg-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.pp-raised {
+  background-color: var(--bg-raised);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+}

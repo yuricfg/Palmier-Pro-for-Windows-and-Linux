@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Tauri / Rust
+apps/desktop/src-tauri/target/
+
+# Vite
+.vite/
