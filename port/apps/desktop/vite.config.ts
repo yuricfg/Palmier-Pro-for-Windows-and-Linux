@@ -16,6 +16,7 @@ export default defineConfig(async () => ({
   resolve: {
     alias: {
       "@palmier/schema": r("../../packages/schema/src/index.ts"),
+      "@palmier/engine": r("../../packages/engine/src/index.ts"),
       "@palmier/ui/theme.css": r("../../packages/ui/src/theme.css"),
       "@palmier/ui": r("../../packages/ui/src/index.ts"),
     },

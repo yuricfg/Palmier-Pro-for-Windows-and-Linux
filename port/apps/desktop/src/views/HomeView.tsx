@@ -1,131 +1,163 @@
-import { useMemo } from "react";
-import { trackColors } from "@palmier/ui";
-import { FolderIcon, FilmIcon } from "../components/icons";
-import { summarize } from "../lib/summary";
-import type { OpenedProject } from "../lib/project";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FolderOpen, Plus, Film, Trash2, Loader2 } from "lucide-react";
+import { readRegistry, readThumbnail, removeFromRegistry, type RegistryEntry } from "../lib/registry";
+import { NewProjectDialog } from "./NewProjectDialog";
+import type { NewProjectOptions } from "../App";
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+function ProjectCard({
+  entry,
+  onOpen,
+  onRemove,
+}: {
+  entry: RegistryEntry;
+  onOpen: () => void;
+  onRemove: () => void;
+}) {
+  const [thumb, setThumb] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    readThumbnail(entry.path)
+      .then((b64) => alive && setThumb(b64 ? `data:image/jpeg;base64,${b64}` : null))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [entry.path]);
+
+  const date = entry.last_opened ? new Date(entry.last_opened).toLocaleDateString("pt-BR") : "";
+
   return (
-    <div className="pp-raised flex flex-col gap-1 p-4">
-      <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-        {label}
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.15 }}
+      onClick={onOpen}
+      className="pp-glass group relative cursor-pointer overflow-hidden p-0"
+      title={entry.path}
+    >
+      <div className="grid aspect-video place-items-center" style={{ background: "rgb(0 0 0 / 0.4)" }}>
+        {thumb ? <img src={thumb} alt="" className="h-full w-full object-cover" /> : <Film size={26} style={{ color: "var(--text-muted)" }} />}
       </div>
-      <div className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>
-        {value}
+      <div className="px-3 py-2.5">
+        <div className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+          {entry.name}
+        </div>
+        <div className="mt-0.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          {entry.width && entry.height ? `${entry.width}×${entry.height} · ` : ""}
+          {date}
+        </div>
       </div>
-    </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        title="Remover do histórico"
+        className="absolute right-2 top-2 grid h-7 w-7 cursor-pointer place-items-center rounded-lg opacity-0 transition-opacity group-hover:opacity-100"
+        style={{ background: "rgb(0 0 0 / 0.55)", color: "var(--text-secondary)" }}
+      >
+        <Trash2 size={14} />
+      </button>
+    </motion.div>
   );
 }
 
 export function HomeView({
-  opened,
   busy,
   error,
-  onOpen,
+  onPick,
+  onOpenPath,
+  onNewProject,
 }: {
-  opened: OpenedProject | null;
   busy: boolean;
   error: string | null;
-  onOpen: () => void;
+  onPick: () => void;
+  onOpenPath: (path: string) => void;
+  onNewProject: (o: NewProjectOptions) => void;
 }) {
-  const summary = useMemo(() => (opened ? summarize(opened.project) : null), [opened]);
+  const [recents, setRecents] = useState<RegistryEntry[]>([]);
+  const [showNew, setShowNew] = useState(false);
+
+  const refresh = () => readRegistry().then(setRecents).catch(() => setRecents([]));
+  useEffect(() => {
+    refresh();
+  }, []);
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <header className="flex items-center justify-between">
+    <div className="mx-auto flex h-full max-w-5xl flex-col gap-6 overflow-auto p-8">
+      <motion.header
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="flex items-end justify-between"
+      >
         <div>
-          <h1 className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>
-            Início
-          </h1>
-          <p className="text-sm" style={{ color: "var(--text-tertiary)" }}>
-            Abra um projeto <code>.palmier</code> para inspecionar a timeline.
+          <h1 className="pp-gradient-text text-3xl font-bold tracking-tight">Projetos</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
+            Crie um novo projeto ou continue de onde parou.
           </p>
         </div>
         <button
-          onClick={onOpen}
+          onClick={onPick}
           disabled={busy}
-          className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
-          style={{ background: "var(--accent-color)", color: "rgb(var(--c-base))" }}
+          className="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium disabled:opacity-60"
+          style={{ background: "rgb(var(--c-white) / 0.06)", border: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}
         >
-          <FolderIcon width={16} height={16} />
-          {busy ? "Abrindo…" : "Abrir projeto"}
+          {busy ? <Loader2 size={16} className="animate-spin" /> : <FolderOpen size={16} />}
+          Abrir do disco
         </button>
-      </header>
+      </motion.header>
 
       {error && (
         <div
-          className="rounded-lg px-4 py-3 text-sm"
-          style={{ background: "rgb(229 79 79 / 0.12)", color: "#ff9b9b", border: "1px solid rgb(229 79 79 / 0.3)" }}
+          className="rounded-xl px-4 py-3 text-sm"
+          style={{ background: "rgb(229 79 79 / 0.12)", color: "#ffb3b3", border: "1px solid rgb(229 79 79 / 0.3)" }}
         >
           {error}
         </div>
       )}
 
-      {!opened && !error && (
-        <div
-          className="pp-surface flex flex-col items-center justify-center gap-3 py-20 text-center"
-          style={{ color: "var(--text-muted)" }}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <motion.button
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.15 }}
+          onClick={() => setShowNew(true)}
+          className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)]"
+          style={{ border: "1.5px dashed var(--border-strong)", color: "var(--text-tertiary)" }}
         >
-          <FilmIcon width={40} height={40} />
-          <div className="text-sm">Nenhum projeto aberto ainda.</div>
+          <div
+            className="grid h-12 w-12 place-items-center rounded-2xl text-white"
+            style={{ background: "var(--accent-gradient)", boxShadow: "var(--accent-glow)" }}
+          >
+            <Plus size={22} />
+          </div>
+          <span className="text-sm font-medium">Novo projeto</span>
+        </motion.button>
+
+        {recents.map((entry) => (
+          <ProjectCard
+            key={entry.path}
+            entry={entry}
+            onOpen={() => onOpenPath(entry.path)}
+            onRemove={() => removeFromRegistry(entry.path).then(refresh)}
+          />
+        ))}
+      </div>
+
+      {recents.length === 0 && (
+        <div className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
+          Nenhum projeto recente ainda.
         </div>
       )}
 
-      {opened && summary && (
-        <>
-          <div className="pp-surface flex items-center gap-4 p-4">
-            <div
-              className="grid h-20 w-32 shrink-0 place-items-center overflow-hidden rounded-md"
-              style={{ background: "rgb(var(--c-base))" }}
-            >
-              {opened.thumbnailDataUrl ? (
-                <img src={opened.thumbnailDataUrl} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <FilmIcon width={28} height={28} />
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="truncate text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {opened.name}
-              </div>
-              <div className="truncate text-xs" style={{ color: "var(--text-muted)" }}>
-                {opened.path}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label="FPS" value={summary.fps} />
-            <StatCard label="Resolução" value={summary.resolution} />
-            <StatCard label="Duração" value={summary.durationLabel} />
-            <StatCard label="Mídia" value={summary.mediaCount} />
-            <StatCard label="Trilhas" value={summary.trackCount} />
-            <StatCard label="Clipes" value={summary.clipCount} />
-            <StatCard label="Frames" value={summary.totalFrames} />
-          </div>
-
-          <div className="pp-surface p-4">
-            <div className="mb-3 text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              Por tipo de trilha
-            </div>
-            <div className="flex flex-col gap-2">
-              {summary.byType.map((row) => (
-                <div key={row.type} className="flex items-center gap-3 text-sm">
-                  <span
-                    className="h-3 w-3 rounded-full"
-                    style={{ background: trackColors[row.type] ?? "var(--text-muted)" }}
-                  />
-                  <span className="w-20 capitalize" style={{ color: "var(--text-secondary)" }}>
-                    {row.type}
-                  </span>
-                  <span style={{ color: "var(--text-tertiary)" }}>
-                    {row.tracks} trilha(s) · {row.clips} clipe(s)
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
+      {showNew && (
+        <NewProjectDialog
+          onClose={() => setShowNew(false)}
+          onCreate={(o) => {
+            setShowNew(false);
+            onNewProject(o);
+          }}
+        />
       )}
     </div>
   );

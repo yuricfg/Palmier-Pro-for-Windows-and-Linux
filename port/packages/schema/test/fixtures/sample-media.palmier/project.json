@@ -1,0 +1,137 @@
+{
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "settingsConfigured": true,
+  "tracks": [
+    {
+      "id": "t-bg",
+      "type": "image",
+      "clips": [
+        {
+          "id": "c-bg",
+          "mediaRef": "bg",
+          "mediaType": "image",
+          "sourceClipType": "image",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "fadeInFrames": 20,
+          "fadeOutFrames": 20
+        }
+      ]
+    },
+    {
+      "id": "t-box",
+      "type": "image",
+      "clips": [
+        {
+          "id": "c-box",
+          "mediaRef": "box",
+          "mediaType": "image",
+          "sourceClipType": "image",
+          "startFrame": 0,
+          "durationFrames": 150,
+          "transform": {
+            "centerX": 0.5,
+            "centerY": 0.5,
+            "width": 0.25,
+            "height": 0.4444444444444444,
+            "rotation": 0
+          },
+          "opacityTrack": {
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0,
+                "interpolationOut": "smooth"
+              },
+              {
+                "frame": 30,
+                "value": 1,
+                "interpolationOut": "linear"
+              }
+            ]
+          },
+          "positionTrack": {
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": {
+                  "a": 0.05,
+                  "b": 0.6
+                },
+                "interpolationOut": "smooth"
+              },
+              {
+                "frame": 150,
+                "value": {
+                  "a": 0.7,
+                  "b": 0.2
+                },
+                "interpolationOut": "smooth"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "t-text",
+      "type": "text",
+      "clips": [
+        {
+          "id": "c-text",
+          "mediaRef": "text-1",
+          "mediaType": "text",
+          "sourceClipType": "text",
+          "startFrame": 15,
+          "durationFrames": 120,
+          "textContent": "Palmier Pro",
+          "fadeInFrames": 15,
+          "textStyle": {
+            "fontName": "Inter-Bold",
+            "fontSize": 120,
+            "fontScale": 1,
+            "color": {
+              "r": 1,
+              "g": 1,
+              "b": 1,
+              "a": 1
+            },
+            "alignment": "center",
+            "shadow": {
+              "enabled": true,
+              "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0.6
+              },
+              "offsetX": 0,
+              "offsetY": -2,
+              "blur": 8
+            },
+            "background": {
+              "enabled": false,
+              "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 0.6
+              }
+            },
+            "border": {
+              "enabled": false,
+              "color": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

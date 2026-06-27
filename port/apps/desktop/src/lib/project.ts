@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { parseProject, type ParsedProject, type RawProjectPackage } from "@palmier/schema";
+import { parseProject, serializeProject, type ParsedProject, type RawProjectPackage } from "@palmier/schema";
 
 /** Shape returned by the Rust `read_project_package` command (snake_case). */
 interface RustRawPackage {
@@ -34,6 +34,20 @@ export async function openProjectAt(path: string): Promise<OpenedProject> {
     thumbnailDataUrl: raw.thumbnail_base64 ? `data:image/jpeg;base64,${raw.thumbnail_base64}` : null,
     project: parseProject(schemaRaw),
   };
+}
+
+/** Serializes the parsed project and writes it back to the package directory. */
+export async function saveProjectPackage(path: string, project: ParsedProject): Promise<void> {
+  const raw = serializeProject(project);
+  await invoke("write_project_package", {
+    path,
+    payload: {
+      timeline_json: raw.timelineJson,
+      manifest_json: raw.manifestJson ?? null,
+      generation_log_json: raw.generationLogJson ?? null,
+      chat_sessions: raw.chatSessions ?? null,
+    },
+  });
 }
 
 /** Opens the directory picker and loads the chosen `.palmier` package. Returns null if cancelled. */

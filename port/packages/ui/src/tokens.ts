@@ -9,9 +9,18 @@ export const channels = {
   raised: "30 30 30",
   prominent: "44 44 44",
   white: "255 255 255",
-  /** Warm off-white accent (AppTheme.Accent.primary). */
-  accent: "245 239 228",
+  /** Default indigo accent (gradient pairs with violet #A855F7). */
+  accent: "99 102 241",
 } as const;
+
+/** Curated accent swatches surfaced in the Appearance panel. */
+export const accentSwatches: { name: string; accent: string; accent2: string }[] = [
+  { name: "Indigo", accent: "#6366f1", accent2: "#a855f7" },
+  { name: "Aurora", accent: "#22d3ee", accent2: "#6366f1" },
+  { name: "Sunset", accent: "#fb7185", accent2: "#f59e0b" },
+  { name: "Emerald", accent: "#10b981", accent2: "#22d3ee" },
+  { name: "Cream", accent: "#f5efe4", accent2: "#c7b89b" },
+];
 
 export const trackColors: Record<string, string> = {
   video: "#0091c2",

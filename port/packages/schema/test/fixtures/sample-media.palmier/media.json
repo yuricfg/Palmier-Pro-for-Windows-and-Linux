@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "entries": [
+    {
+      "id": "bg",
+      "name": "bg.png",
+      "type": "image",
+      "source": {
+        "project": {
+          "relativePath": "media/bg.png"
+        }
+      },
+      "duration": 5
+    },
+    {
+      "id": "box",
+      "name": "box.png",
+      "type": "image",
+      "source": {
+        "project": {
+          "relativePath": "media/box.png"
+        }
+      },
+      "duration": 5
+    }
+  ],
+  "folders": []
+}

@@ -13,6 +13,19 @@ body {
   overflow: hidden;
 }
 
+/* App chrome shouldn't feel like a web page: no text selection except in fields. */
+.pp-app,
+.pp-app * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pp-app input,
+.pp-app textarea,
+.pp-app [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
